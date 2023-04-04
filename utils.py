@@ -2,7 +2,6 @@ from PIL import Image
 import numpy as np
 import matplotlib.image as mpimg
 from matplotlib import pyplot as plt
-from hyperparameters import hp
 import torch
 
 def convert_to_rgb(image):
@@ -16,10 +15,6 @@ def show_img(img,size=10):
   plt.figure(figsize=(size, size))
   plt.imshow(np.transpose(npimg, (1, 2, 0)))
   plt.show()
-
-def to_img(x):    
-    x = x.view(x.size(0)*2, hp.channels, hp.img_size, hp.img_size)
-    return x
 
 
 def plot_output(path, x, y):

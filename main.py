@@ -6,13 +6,16 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.autograd as autograd
 from torchvision.utils import make_grid
-from hyperparameters import hp
-from dataset import train_dataloader, val_dataloader
+from hyperparameters import Hyperparameters
+from dataset import ImageDataset
+from torch.utils.data import Dataset, DataLoader
+import torchvision.transforms as transforms
 from model import ReplayBuffer, GeneratorResNet,Discriminator, LambdaLR
 from torchvision.utils import save_image
 from utils import initialize_conv_weights_normal,plot_output
 from tqdm import tqdm
 import pickle
+import argparse
 
 
 def save_img_samples(epoch):
@@ -38,7 +41,7 @@ def save_img_samples(epoch):
     return path 
 
 
-def train(Gen_BA,Gen_AB,Disc_A,Disc_B,train_dataloader,n_epochs,criterion_identity,
+def train(name,Gen_BA,Gen_AB,Disc_A,Disc_B,train_dataloader,n_epochs,criterion_identity,
           criterion_cycle,lambda_cyc,criterion_GAN,optimizer_G,fake_A_buffer,fake_B_buffer,
           optimizer_Disc_A,optimizer_Disc_B,Tensor,lambda_id):
     
@@ -157,7 +160,11 @@ def train(Gen_BA,Gen_AB,Disc_A,Disc_B,train_dataloader,n_epochs,criterion_identi
         disc_loss_total.append(disc_loss)
         id_loss_total.append(id_loss)
         plot_output(save_img_samples(epoch), 30, 40)
-        path = "checkpoint/CycleGan_VanGogh_Checkpoint.pt"
+        
+        path = "./checkpoint"
+        if os.path.exists(path) is not True:
+            os.mkdir(path)
+        path = path + "/"+name+".pt"
         torch.save({
                     'epoch': epoch,
                     'Gen_AB': Gen_AB.state_dict(),
@@ -184,13 +191,66 @@ def train(Gen_BA,Gen_AB,Disc_A,Disc_B,train_dataloader,n_epochs,criterion_identi
 ##training ends
         
 if __name__=="__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--name", required=True, default="CycleGan_VanGogh_Checkpoint", help="Name of model to be saved.")
+    parser.add_argument("--data_dir_A", default="dataset/vangogh2photo/trainA", type=str, 
+                        help="Directory of Van Gogh pictures/Image data A.")
+    parser.add_argument("--data_dir_B", default="dataset/vangogh2photo/trainB", type=str, 
+                        help="Directory of Van Gogh pictures/Image data B.")
+    parser.add_argument("--val_data_dir_A", default="dataset/vangogh2photo/testA", type=str,
+                        help="validation data directory for image data A.")
+    parser.add_argument("--val_data_dir_B", default="dataset/vangogh2photo/testB", type=str,
+                        help="validation data directory for image data B.")
+    parser.add_argument("--epochs", default=10,type=int, help="Number of epochs. Best to use 200 as discussed in paper.")
+    parser.add_argument("--lr", default=.0002, type=int, help= "Learning rate")
+    parser.add_argument("--decay_start_epoch", default= 5, type=int, help="Epoch number where decay starts.")
+    parser.add_argument("--num_residual_blocks",default=9,type=int, help="Number of residual blocks in CycleGAN generator.")
+    parser.add_argument("--img_size", default=256, type=int, help="Dimension of the image. Training image must be nxn.")
+    parser.add_argument("--batch_size", default= 4, type= int, help= "Batch size for training.")
+    args = parser.parse_args()
+
+    hp = Hyperparameters(name = args.name, n_epochs = args.epochs, batch_size = args.batch_size, lr = args.lr, decay_start_epoch = args.decay_start_epoch,
+                         b1 = 0.5,b2 = 0.999, img_size = args.img_size, channels = 3, num_residual_blocks = args.num_residual_blocks,
+                         lambda_cyc = 10.0, lambda_id = 5.0)
+
+    print("Hyperparameters: \n")
+    print(hp)
+
+    train_transforms_ = [
+        transforms.Resize((286, 286)),
+        transforms.RandomRotation(degrees=(0,180)),
+        transforms.RandomCrop(size=(hp.img_size,hp.img_size)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ]
+
+    val_transforms_ = [
+        transforms.Resize((hp.img_size, hp.img_size)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ]
+
+    train_dataloader = DataLoader(
+        ImageDataset(root=[args.data_dir_A,args.data_dir_B], transforms_=train_transforms_),
+        batch_size=hp.batch_size,
+        shuffle=True,
+        num_workers=2)
+    
+    val_dataloader = DataLoader(
+        ImageDataset(root= [args.val_data_dir_A,args.val_data_dir_B], transforms_=val_transforms_),
+        batch_size=8,
+        shuffle=True,
+        num_workers=2)
+    def to_img(x):
+        x = x.view(x.size(0)*2, hp.channels, hp.img_size, hp.img_size)
+        return x
+
     cuda = True if torch.cuda.is_available() else False
     print("Using CUDA" if cuda else "Not using CUDA")
+    if cuda is False:
+        exit("CUDA is necessary to train the model.")
     Tensor = torch.cuda.FloatTensor if cuda else torch.Tensor
-    # print(checkpoint)
-    # # Loss functions
-    # # Creating criterion object that will measure the error between the prediction and the target.
-    # 
+ 
     criterion_GAN = torch.nn.MSELoss()
     criterion_cycle = torch.nn.L1Loss()
     criterion_identity = torch.nn.L1Loss()
@@ -251,7 +311,7 @@ if __name__=="__main__":
         Disc_A.apply(initialize_conv_weights_normal)
         Disc_B.apply(initialize_conv_weights_normal)
 
-    train(Gen_BA = Gen_BA,Gen_AB = Gen_AB,Disc_A = Disc_A,Disc_B = Disc_B,train_dataloader = train_dataloader,
+    train(name = hp.name, Gen_BA = Gen_BA,Gen_AB = Gen_AB,Disc_A = Disc_A,Disc_B = Disc_B,train_dataloader = train_dataloader,
           n_epochs = hp.n_epochs,criterion_identity = criterion_identity,criterion_cycle = criterion_cycle, lambda_cyc = hp.lambda_cyc,
           criterion_GAN = criterion_GAN,optimizer_G = optimizer_G,fake_A_buffer = fake_A_buffer,fake_B_buffer = fake_B_buffer,
           optimizer_Disc_A = optimizer_Disc_A,optimizer_Disc_B = optimizer_Disc_B,Tensor = Tensor, lambda_id = hp.lambda_id)
