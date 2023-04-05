@@ -9,7 +9,7 @@ import io
 
 t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
 
-@st.cache_resource(hash_funcs={"MyUnhashableClass": lambda _: None})
+@st.cache_resource
 def load_model():
     Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
     checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
