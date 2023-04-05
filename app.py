@@ -6,14 +6,16 @@ import torchvision.transforms as transforms
 from PIL import Image
 import io
 
-Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
 
 t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
 
 @st.cache
-checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
-Gen_BA.load_state_dict(checkpoint['Gen_BA'])
+def load_model():
+    Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
+    checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
+    return Gen_BA.load_state_dict(checkpoint['Gen_BA'])
 
+Gen_BA = load_model()
 def predict(im):
     w,h = im.size
     if h or w >=600:
