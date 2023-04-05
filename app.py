@@ -9,7 +9,7 @@ import io
 Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
 
 t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
-checkpoint = torch.load("checkpoint\CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
+checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
 Gen_BA.load_state_dict(checkpoint['Gen_BA'])
 
 def predict(im):
@@ -36,7 +36,7 @@ st.markdown("""This app has been built using a machine learning model called Cyc
 st.markdown("""The model hasn't yet been trained to it's limits. It performs poorly on people and objects such as cars. 
 However, the model performs reasonably well on pictures of scenery or nature. The dataset that was used to train the model mostly
 contained pictures of scenery, hence this handicap.""")
-vg = Image.open("style\Self-Portrait_(1889)_by_Vincent_van_Gogh.jpg")
+vg = Image.open("style/Self-Portrait_(1889)_by_Vincent_van_Gogh.jpg")
 vg = vg.resize([int(vg.size[0]*0.2),int(vg.size[1]*0.2)])
 with st.sidebar:
     st.image(vg,caption="Self portrait by Van Gogh, 1889")
