@@ -26,7 +26,7 @@ def predict(im):
         width = int(w * scale_factor)
         im = transforms.Resize((height,width))(im)
     input = t(im)
-    Gen_BA.module.eval()
+    Gen_BA.eval()
     output = Gen_BA(input.unsqueeze(0))
     output = output/2 +0.5
     return (transforms.ToPILImage()(output.squeeze(0)))
