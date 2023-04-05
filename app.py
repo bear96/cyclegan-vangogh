@@ -9,6 +9,8 @@ import io
 Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
 
 t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
+
+@st.cache
 checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
 Gen_BA.load_state_dict(checkpoint['Gen_BA'])
 
