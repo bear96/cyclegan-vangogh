@@ -11,14 +11,15 @@ t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5)
 
 @st.cache_resource
 def load_model():
-    Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
     checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
-    return Gen_BA.load_state_dict(checkpoint['Gen_BA'])
+    return checkpoint
 
-Gen_BA = load_model()
+checkpoint = load_model()
+Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
+Gen_BA.load_state_dict(checkpoint['Gen_BA'])
 
 
-def predict(im):
+def predict(im,Gen_BA):
     w,h = im.size
     if h or w >=500:
         scale_factor = 500/max(h,w)
@@ -71,6 +72,6 @@ else:
 
 if pred_button:
     with st.spinner("Generating. Please wait..."):
-        gen_image = predict(img)
+        gen_image = predict(img,Gen_BA)
         st.caption("Generated image.")
         st.image(gen_image)
