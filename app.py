@@ -19,8 +19,8 @@ Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
 Gen_BA.load_state_dict(checkpoint['Gen_BA'])
 def predict(im):
     w,h = im.size
-    if h or w >=600:
-        scale_factor = 600/max(h,w)
+    if h or w >=500:
+        scale_factor = 500/max(h,w)
         height = int(h * scale_factor)
         width = int(w * scale_factor)
         im = transforms.Resize((height,width))(im)
