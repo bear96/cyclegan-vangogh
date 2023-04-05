@@ -13,9 +13,10 @@ t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5)
 def load_model():
     Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
     checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
-    return Gen_BA.load_state_dict(checkpoint['Gen_BA'])
+    return checkpoint
 
-Gen_BA = load_model()
+checkpoint = load_model()
+Gen_BA.load_state_dict(checkpoint['Gen_BA'])
 def predict(im):
     w,h = im.size
     if h or w >=600:
@@ -24,7 +25,7 @@ def predict(im):
         width = int(w * scale_factor)
         im = transforms.Resize((height,width))(im)
     input = t(im)
-    Gen_BA.eval()
+    Gen_BA.module.eval()
     output = Gen_BA(input.unsqueeze(0))
     output = output/2 +0.5
     return (transforms.ToPILImage()(output.squeeze(0)))
