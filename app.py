@@ -5,6 +5,7 @@ from model import GeneratorResNet
 import torchvision.transforms as transforms
 from PIL import Image
 import io
+import gc
 
 
 t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
@@ -62,6 +63,7 @@ file = st.file_uploader(label="Upload your image",type=['.png','.jpg','jpeg'])
 
 if not file:
     st.warning("Please upload an image")
+    gc.collect()
     st.stop()
 else:
     image = file.read()
@@ -73,5 +75,8 @@ else:
 if pred_button:
     with st.spinner("Generating. Please wait..."):
         gen_image = predict(img,Gen_BA)
+        del img
         st.caption("Generated image.")
         st.image(gen_image)
+    del gen_image
+    del image
