@@ -4,6 +4,8 @@ This is a Pytorch implementation of CycleGAN to transfer Van Gogh's art style on
 To download the dataset, run ./download.sh in your terminal before executing main.py. Please install the required packages using 
 ```pip3 install -r requirements.txt```
 
+The model has now been deployed on [Streamlit](https://bear96-cyclegan-vangogh-app-qfaofp.streamlit.app/)
+
 ## Results of training
 
 Loss graph coming
