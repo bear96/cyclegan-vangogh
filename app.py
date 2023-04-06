@@ -43,9 +43,8 @@ st.markdown("""The model hasn't yet been trained to it's limits. It performs poo
 However, the model performs reasonably well on pictures of scenery or nature. The dataset that was used to train the model mostly
 contained pictures of scenery, hence this handicap.""")
 st.warning("""Please note that the app may crash if you provide it with an image that's too large with very high resolution. \
-    Typically, the model seems to perform well on images which are less than or equal to 1MB in size. If you're using this from your phone,
-    it is possible that the model may not work if you provide an image with a .PNG extension. I'm unaware of why this error happens, since
-    if you try to provide the same image via laptop, it works perfectly fine. I'm working on solving this issue.""")
+    Typically, the model seems to perform well on images which are less than or equal to 1MB in size.
+    """)
 vg = Image.open("style/Self-Portrait_(1889)_by_Vincent_van_Gogh.jpg")
 vg = vg.resize([int(vg.size[0]*0.2),int(vg.size[1]*0.2)])
 with st.sidebar:
