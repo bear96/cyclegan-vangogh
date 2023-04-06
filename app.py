@@ -14,13 +14,12 @@ t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5)
 
 @st.cache_resource
 def load_model():
-    checkpoint = None
     if not os.path.exists('CycleGan_VanGogh_Checkpoint.pt'):
         u = urlopen("https://www.dropbox.com/s/p3lvh4j23tuy1g5/CycleGan_VanGogh_Checkpoint.pt?dl=0")
         data = u.read()
         u.close()
         checkpoint = torch.load(data,map_location=torch.device('cpu'))
-    return checkpoint
+        return checkpoint
 
 checkpoint = load_model()
 Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
