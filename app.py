@@ -27,8 +27,8 @@ def predict(im,Gen_BA):
         height = int(h * scale_factor)
         width = int(w * scale_factor)
         im = transforms.Resize((height,width))(im)
+    st.write(im.shape)
     input = t(im)
-    st.write(input.shape)
     Gen_BA.eval()
     output = Gen_BA(input.unsqueeze(0))
     output = output/2 +0.5
@@ -71,7 +71,6 @@ else:
     st.caption("Your image.")
     st.image(image, use_column_width=True)
     img = Image.open(io.BytesIO(image))
-    st.write(img.size)
     pred_button = st.button("Generate")
 
 if pred_button:
