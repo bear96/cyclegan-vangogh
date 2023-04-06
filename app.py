@@ -5,6 +5,7 @@ from model import GeneratorResNet
 import torchvision.transforms as transforms
 from PIL import Image
 import io
+import os
 import gc
 from urllib.request import urlopen
 #https://www.dropbox.com/s/p3lvh4j23tuy1g5/CycleGan_VanGogh_Checkpoint.pt?dl=0
