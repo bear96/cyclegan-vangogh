@@ -18,6 +18,7 @@ def load_model():
         u = urlopen("https://www.dropbox.com/s/p3lvh4j23tuy1g5/CycleGan_VanGogh_Checkpoint.pt?dl=0")
         data = u.read()
         u.close()
+        st.write(data)
         checkpoint = torch.load(data,map_location=torch.device('cpu'))
         return checkpoint
 
