@@ -5,22 +5,15 @@ from model import GeneratorResNet
 import torchvision.transforms as transforms
 from PIL import Image
 import io
-import os
 import gc
-from urllib.request import urlopen
-#https://www.dropbox.com/s/p3lvh4j23tuy1g5/CycleGan_VanGogh_Checkpoint.pt?dl=0
+
 
 t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
 
 @st.cache_resource
 def load_model():
-    if not os.path.exists('CycleGan_VanGogh_Checkpoint.pt'):
-        u = urlopen("https://www.dropbox.com/s/p3lvh4j23tuy1g5/CycleGan_VanGogh_Checkpoint.pt?dl=0")
-        data = u.read()
-        u.close()
-        st.write(data)
-        checkpoint = torch.load(data,map_location=torch.device('cpu'))
-        return checkpoint
+    checkpoint = torch.load("checkpoint/CycleGan_VanGogh_Checkpoint.pt",map_location=torch.device('cpu'))
+    return checkpoint
 
 checkpoint = load_model()
 Gen_BA = nn.DataParallel(GeneratorResNet((3,256,256), 10))
