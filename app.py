@@ -71,7 +71,7 @@ else:
     image = file.read()
     st.caption("Your image.")
     st.image(image, use_column_width=True)
-    img = Image.open(io.BytesIO(image))
+    img = Image.open(io.BytesIO(image)).convert("RGB")
     pred_button = st.button("Generate")
 
 if pred_button:
