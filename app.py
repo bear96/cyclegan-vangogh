@@ -11,7 +11,7 @@ t = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5)
 
 @st.cache_resource
 def load_model():
-    model = torch.jit.load('checkpoint/CycleGAN_Generator.pt')
+    model = torch.jit.load('checkpoint/CycleGAN_Generator_50.pt')
     return model
 
 Gen_BA = load_model()
