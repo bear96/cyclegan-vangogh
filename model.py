@@ -49,22 +49,23 @@ class LambdaLR:
 '''Single Residual Block. InstanceNorm2d produces blob artefacts. Consider changing it to modulated convolutions later.
 Currently using augmentation and a low number of epochs to stop Generator from producing artefacts.'''
 
-class ResidualBlock(nn.Module):
-    def __init__(self, in_channel):
-        super(ResidualBlock, self).__init__()
+class ResNetBlock(nn.Module):
+    def __init__(self, channels):
+        super(ResNetBlock, self).__init__()
 
-        self.block = nn.Sequential(
+        self.conv_block = nn.Sequential(
             nn.ReflectionPad2d(1),
-            nn.Conv2d(in_channel, in_channel, 3),
-            nn.InstanceNorm2d(in_channel),
-            nn.LeakyReLU(inplace=True),
+            nn.Conv2d(channels, channels, kernel_size=3, padding=0, bias=True),
+            nn.InstanceNorm2d(channels),
+            nn.ReLU(inplace=True),
             nn.ReflectionPad2d(1),
-            nn.Conv2d(in_channel, in_channel, 3),
-            nn.InstanceNorm2d(in_channel),
+            nn.Conv2d(channels, channels, kernel_size=3, padding=0, bias=True),
+            nn.InstanceNorm2d(channels)
         )
 
     def forward(self, x):
-        return x + self.block(x)
+        return x + self.conv_block(x)
+
     
 '''Generator architecture with ResNet backbone. I am using LeakyReLU instead of ReLU. Seems to give faster convergence.'''
 
@@ -97,7 +98,7 @@ class GeneratorResNet(nn.Module):
         # Residual blocks
 
         for _ in range(num_residual_blocks):
-            model += [ResidualBlock(out_channels)]
+            model += [ResNetBlock(out_channels)]
 
         # Decoder
         for _ in range(2):
